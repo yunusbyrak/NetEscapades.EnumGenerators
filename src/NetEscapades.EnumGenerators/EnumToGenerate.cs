@@ -9,6 +9,7 @@ public readonly struct EnumToGenerate
     public readonly bool HasFlags;
     public readonly string UnderlyingType;
     public readonly List<KeyValuePair<string, object>> Values;
+    public readonly Dictionary<string, string> AttrKeyValuePairs;
 
     public EnumToGenerate(
     string name,
@@ -17,7 +18,8 @@ public readonly struct EnumToGenerate
     string underlyingType,
     bool isPublic,
     List<KeyValuePair<string, object>> values,
-    bool hasFlags)
+    bool hasFlags,
+    Dictionary<string, string> attrKeyValuePairs)
     {
         Name = name;
         Namespace = ns;
@@ -26,5 +28,6 @@ public readonly struct EnumToGenerate
         HasFlags = hasFlags;
         IsPublic = isPublic;
         FullyQualifiedName = fullyQualifiedName;
+        AttrKeyValuePairs = attrKeyValuePairs;
     }
 }

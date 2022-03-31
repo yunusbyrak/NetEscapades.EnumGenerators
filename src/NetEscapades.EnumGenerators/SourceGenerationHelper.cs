@@ -44,6 +44,7 @@ namespace NetEscapades.EnumGenerators
 }
 #endif
 ";
+
     public static string GenerateExtensionClass(StringBuilder sb, EnumToGenerate enumToGenerate)
     {
         sb.Append(Header);
@@ -56,7 +57,8 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
         }
 
         sb.Append(@"
-    ").Append(enumToGenerate.IsPublic ? "public" : "internal").Append(@" static partial class ").Append(enumToGenerate.Name).Append(@"
+    ").Append(enumToGenerate.IsPublic ? "public" : "internal").Append(@" static partial class ")
+            .Append(enumToGenerate.Name).Append(@"
     {
         public static string ToStringFast(this ").Append(enumToGenerate.FullyQualifiedName).Append(@" value)
             => value switch
@@ -65,8 +67,32 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
         {
             sb.Append(@"
                 ").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key)
-                .Append(" => nameof(")
-                .Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append("),");
+                .Append(" => \"")
+                .Append(enumToGenerate.AttrKeyValuePairs.ContainsKey(member.Key)
+                    ? enumToGenerate.AttrKeyValuePairs[member.Key]
+                    : member.Key)
+                .Append($"\",// {enumToGenerate.AttrKeyValuePairs.ContainsKey(member.Key)}");
+        }
+
+        sb.Append(@"
+                _ => value.ToString(),
+            };");
+
+        sb.Append(@"
+
+        public static string ToStringLowerFast(this ").Append(enumToGenerate.FullyQualifiedName).Append(
+            @" value)
+            => value switch
+            {");
+        foreach (var member in enumToGenerate.Values)
+        {
+            sb.Append(@"
+                ").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key)
+                .Append(" => \"")
+                .Append(enumToGenerate.AttrKeyValuePairs.ContainsKey(member.Key)
+                    ? enumToGenerate.AttrKeyValuePairs[member.Key].ToLower()
+                    : member.Key.ToLower())
+                .Append("\",");
         }
 
         sb.Append(@"
@@ -77,7 +103,8 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
         {
             sb.Append(@"
 
-        public static bool HasFlag(this ").Append(enumToGenerate.FullyQualifiedName).Append(@" value, ").Append(enumToGenerate.FullyQualifiedName).Append(@" flag)
+        public static bool HasFlag(this ").Append(enumToGenerate.FullyQualifiedName).Append(@" value, ")
+                .Append(enumToGenerate.FullyQualifiedName).Append(@" flag)
             => value switch
             {
                 0  => flag.Equals(0),
@@ -96,6 +123,7 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
                 ").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key)
                 .Append(" => true,");
         }
+
         sb.Append(@"
                 _ => false,
             };
@@ -106,7 +134,8 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
         foreach (var member in enumToGenerate.Values)
         {
             sb.Append(@"
-                nameof(").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append(@") => true,");
+                nameof(").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key)
+                .Append(@") => true,");
         }
 
         sb.Append(@"
@@ -134,7 +163,8 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
         foreach (var member in enumToGenerate.Values)
         {
             sb.Append(@"
-                case { } s when s.Equals(nameof(").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append(@"), System.StringComparison.OrdinalIgnoreCase):
+                case { } s when s.Equals(nameof(").Append(enumToGenerate.FullyQualifiedName).Append('.')
+                .Append(member.Key).Append(@"), System.StringComparison.OrdinalIgnoreCase):
                     value = ").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append(@";
                     return true;");
         }
@@ -185,6 +215,7 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
             sb.Append(@"
                 ").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append(',');
         }
+
         sb.Append(@"
             };
         }
@@ -198,6 +229,7 @@ namespace ").Append(enumToGenerate.Namespace).Append(@"
             sb.Append(@"
                 nameof(").Append(enumToGenerate.FullyQualifiedName).Append('.').Append(member.Key).Append("),");
         }
+
         sb.Append(@"
             };
         }

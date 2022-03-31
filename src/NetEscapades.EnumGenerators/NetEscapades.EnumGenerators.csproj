@@ -5,9 +5,10 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
-    <PackageId>NetEscapades.EnumGenerators</PackageId>
-    <Description>A source generator for creating helper extension methods on enums using a [EnumExtensions] attribute</Description>
+    <PackageId>EtaEmre.NetEscapades.EnumGenerators</PackageId>
+    <Description>A source generator for creating helper extension methods on enums using a [EnumExtensions] attribute (Modified version of NetEscapades.EnumGenerators)</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageVersion>1.0.0-beta06</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../README.md" Pack="true" PackagePath="\"/>
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(OutputPath)\NetEscapades.EnumGenerators.Attributes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(OutputPath)\NetEscapades.EnumGenerators.Attributes.dll" Pack="true" PackagePath="lib\netstandard2.0" Visible="true" />

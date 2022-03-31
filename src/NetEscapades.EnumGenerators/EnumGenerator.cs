@@ -36,7 +36,7 @@ public class EnumGenerator : IIncrementalGenerator
     static EnumDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
         // we know the node is a EnumDeclarationSyntax thanks to IsSyntaxTargetForGeneration
-        var enumDeclarationSyntax = (EnumDeclarationSyntax)context.Node;
+        var enumDeclarationSyntax = (EnumDeclarationSyntax) context.Node;
 
         // loop through all the attributes on the method
         foreach (AttributeListSyntax attributeListSyntax in enumDeclarationSyntax.AttributeLists)
@@ -65,7 +65,8 @@ public class EnumGenerator : IIncrementalGenerator
         return null;
     }
 
-    static void Execute(Compilation compilation, ImmutableArray<EnumDeclarationSyntax> enums, SourceProductionContext context)
+    static void Execute(Compilation compilation, ImmutableArray<EnumDeclarationSyntax> enums,
+        SourceProductionContext context)
     {
         if (enums.IsDefaultOrEmpty)
         {
@@ -75,7 +76,8 @@ public class EnumGenerator : IIncrementalGenerator
 
         IEnumerable<EnumDeclarationSyntax> distinctEnums = enums.Distinct();
 
-        List<EnumToGenerate> enumsToGenerate = GetTypesToGenerate(compilation, distinctEnums, context.CancellationToken);
+        List<EnumToGenerate> enumsToGenerate =
+            GetTypesToGenerate(compilation, distinctEnums, context.CancellationToken);
         if (enumsToGenerate.Count > 0)
         {
             StringBuilder sb = new StringBuilder();
@@ -88,7 +90,8 @@ public class EnumGenerator : IIncrementalGenerator
         }
     }
 
-    static List<EnumToGenerate> GetTypesToGenerate(Compilation compilation, IEnumerable<EnumDeclarationSyntax> enums, CancellationToken ct)
+    static List<EnumToGenerate> GetTypesToGenerate(Compilation compilation, IEnumerable<EnumDeclarationSyntax> enums,
+        CancellationToken ct)
     {
         var enumsToGenerate = new List<EnumToGenerate>();
         INamedTypeSymbol? enumAttribute = compilation.GetTypeByMetadataName(EnumExtensionsAttribute);
@@ -112,12 +115,15 @@ public class EnumGenerator : IIncrementalGenerator
             }
 
             string name = enumSymbol.Name + "Extensions";
-            string nameSpace = enumSymbol.ContainingNamespace.IsGlobalNamespace ? string.Empty : enumSymbol.ContainingNamespace.ToString();
+            string nameSpace = enumSymbol.ContainingNamespace.IsGlobalNamespace
+                ? string.Empty
+                : enumSymbol.ContainingNamespace.ToString();
             var hasFlags = false;
 
             foreach (AttributeData attributeData in enumSymbol.GetAttributes())
             {
-                if (hasFlagsAttribute is not null && hasFlagsAttribute.Equals(attributeData.AttributeClass, SymbolEqualityComparer.Default))
+                if (hasFlagsAttribute is not null &&
+                    hasFlagsAttribute.Equals(attributeData.AttributeClass, SymbolEqualityComparer.Default))
                 {
                     hasFlags = true;
                     continue;
@@ -150,6 +156,7 @@ public class EnumGenerator : IIncrementalGenerator
 
             var enumMembers = enumSymbol.GetMembers();
             var members = new List<KeyValuePair<string, object>>(enumMembers.Length);
+            var attrKeyValuePairs = new Dictionary<string, string>();
 
             foreach (var member in enumMembers)
             {
@@ -157,6 +164,25 @@ public class EnumGenerator : IIncrementalGenerator
                     || field.ConstantValue is null)
                 {
                     continue;
+                }
+
+                var attrs = member.GetAttributes();
+                string? _name = null;
+                foreach (var attributeData in attrs)
+                {
+                    foreach (KeyValuePair<string, TypedConstant> namedArgument in attributeData.NamedArguments)
+                    {
+                        if (namedArgument.Key == "Name"
+                            && namedArgument.Value.Value?.ToString() is { } ns)
+                        {
+                            _name = ns;
+                        }
+                    }
+                }
+
+                if (_name != null)
+                {
+                    attrKeyValuePairs.Add(member.Name, _name);
                 }
 
                 members.Add(new KeyValuePair<string, object>(member.Name, field.ConstantValue));
@@ -169,7 +195,8 @@ public class EnumGenerator : IIncrementalGenerator
                 underlyingType: underlyingType,
                 isPublic: enumSymbol.DeclaredAccessibility == Accessibility.Public,
                 hasFlags: hasFlags,
-                values: members));
+                values: members, 
+                attrKeyValuePairs: attrKeyValuePairs));
         }
 
         return enumsToGenerate;

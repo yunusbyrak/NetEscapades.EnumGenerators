@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>NetEscapades.EnumGenerators</RootNamespace>
     <IsPackable>false</IsPackable>
+    <PackageVersion>1.0.0-beta06</PackageVersion>
   </PropertyGroup>
 
 </Project>
